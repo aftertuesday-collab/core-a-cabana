@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core-a-Cabana Challenge</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --sand: #f4e4bc; --ocean: #0077be; --sunset: #ff6b6b; --palm: #2d5a27; --sky: #e0f7fa;
+            --v1: #ff9e22; --v2: #4db6ac; --v3: #9575cd; --v4: #f06292;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', sans-serif; background: linear-gradient(180deg, var(--sky) 0%, var(--sand) 100%);
+            color: var(--palm); margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+        }
+
+        #notification-toast {
+            position: fixed; top: 20px; background: white; padding: 12px 25px; border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 2000; display: none; border: 2px solid var(--sunset);
+            font-weight: bold; animation: slideDown 0.5s;
+        }
+
+        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .tab-bar {
+            position: fixed; bottom: 0; width: 100%; max-width: 450px; background: rgba(255,255,255,0.95);
+            display: flex; justify-content: space-around; padding: 15px 0; border-radius: 25px 25px 0 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 1000; backdrop-filter: blur(10px);
+        }
+        .tab-btn { background: none; border: none; font-size: 0.75rem; font-weight: 800; color: #aaa; cursor: pointer; }
+        .tab-btn.active { color: var(--sunset); border-top: 3px solid var(--sunset); padding-top: 7px; }
+
+        .page { display: none; width: 100%; max-width: 400px; padding: 25px; padding-bottom: 120px; box-sizing: border-box; }
+        .page.active { display: block; animation: slideUp 0.4s ease-out; }
+
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .grid { display: grid; grid-template-columns:
