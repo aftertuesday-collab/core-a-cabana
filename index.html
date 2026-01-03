@@ -116,8 +116,15 @@
 
     <script>
         const quotes = ["You miss 100% of the shots you don’t take.", "Hard work beats talent.", "Don't count the days, make the days count.", "Champions keep playing until they get it right.", "Gold medals are made of sweat.", "Pressure is a privilege.", "Victory is in having done your best.", "Persistence changes failure into achievement."];
-        const firebaseConfig = { apiKey: "AIzaSyCNXn3jKb1xRpHVqZcBy9fEPFjxy_drl_Y", authDomain: "core-a-cabana.firebaseapp.com", projectId: "core-a-cabana", storageBucket: "core-a-cabana.firebasestorage.app", messagingSenderId: "914813550096", appId: "1:914813550096:web:1fdc8e9486b46f0ad09495" };
-        firebase.initializeApp(firebaseConfig);
+        const firebaseConfig = {
+  apiKey: "AIzaSyCNXn3jKb1xRpHVqZcBy9fEPFjxy_drl_Y",
+  authDomain: "core-a-cabana.firebaseapp.com",
+  projectId: "core-a-cabana",
+  storageBucket: "core-a-cabana.firebasestorage.app",
+  messagingSenderId: "914813550096",
+  appId: "1:914813550096:web:8b9dc3c8d2d6862ed09495",
+  measurementId: "G-PMVQXH4BN7"
+};        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         let myName = localStorage.getItem('cabanaName');
         let myWorkouts = JSON.parse(localStorage.getItem('cabanaWorkouts')) || {};
