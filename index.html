@@ -8,146 +8,82 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        :root {
-            --aqua: #00e5ff; --coral: #ff7e5f; --sunny: #feb47b; --pink: #ff4081; --palm: #2e7d32;
-            --v1: #ff9e22; --v2: #4db6ac; --v3: #9575cd; --v4: #f06292;
-        }
-
-        body {
-            font-family: 'Avenir Next', 'Helvetica Neue', sans-serif;
-            background: linear-gradient(-45deg, #00e5ff, #ff7e5f, #feb47b, #72ffb2);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-            color: #fff; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-        }
-
-        @keyframes gradient { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }
-
-        #notification-toast {
-            position: fixed; top: 20px; background: rgba(255,255,255,0.9); padding: 12px 25px; border-radius: 30px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 2000; display: none; border: 2px solid var(--pink);
-            font-weight: bold; color: var(--pink); animation: slideDown 0.5s; backdrop-filter: blur(5px);
-        }
-
-        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .tab-bar {
-            position: fixed; bottom: 0; width: 100%; max-width: 450px; background: rgba(255,255,255,0.2);
-            display: flex; justify-content: space-around; padding: 15px 0; border-radius: 30px 30px 0 0;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 1000; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.3);
-        }
-        .tab-btn { background: none; border: none; font-size: 0.85rem; font-weight: 800; color: #fff; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .tab-btn.active { color: #fff; border-bottom: 4px solid #fff; padding-bottom: 5px; }
-
-        .page { display: none; width: 100%; max-width: 400px; padding: 25px; padding-bottom: 120px; box-sizing: border-box; }
-        .page.active { display: block; animation: slideUp 0.4s ease-out; }
-
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .day-box {
-            aspect-ratio: 1/1; background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255,255,255,0.4);
-            border-radius: 20px; display: flex; flex-direction: column; justify-content: center;
-            align-items: center; cursor: pointer; transition: 0.3s; backdrop-filter: blur(5px);
-        }
-        .day-box:hover { transform: scale(1.05); background: rgba(255, 255, 255, 0.3); }
-        .day-box.complete { border-color: transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .day-box.v1 { background: linear-gradient(135deg, #ff9e22, #ff6d00); }
-        .day-box.v2 { background: linear-gradient(135deg, #4db6ac, #00897b); }
-        .day-box.v3 { background: linear-gradient(135deg, #9575cd, #5e35b1); }
-        .day-box.v4 { background: linear-gradient(135deg, #f06292, #d81b60); }
-        .day-box .check { font-size: 1.5rem; display: none; } .day-box.complete .check { display: block; }
-        .day-box .day-num { font-weight: bold; font-size: 0.9rem; margin-top: 4px; }
-
-        .friend-row { background: rgba(255,255,255,0.2); padding: 18px; border-radius: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); }
-
-        #join-overlay { position: fixed; inset: 0; background: linear-gradient(135deg, var(--aqua), var(--coral)); z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 30px; text-align: center; }
-        
-        .video-card { background: rgba(255,255,255,0.9); padding: 20px; border-radius: 25px; margin-bottom: 15px; border-left: 10px solid var(--aqua); color: #333; }
-        .btn { padding: 18px; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1.1rem; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        
-        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 30px; z-index: 1100; width: 85%; max-width: 320px; text-align: center; color: #333; }
-        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1050; backdrop-filter: blur(8px); }
-        
-        .hydration-card { background: rgba(255,255,255,0.2); padding: 25px; border-radius: 30px; margin-top: 30px; text-align: center; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); }
+        :root { --aqua: #00e5ff; --coral: #ff7e5f; --sunny: #feb47b; --pink: #ff4081; --palm: #2e7d32; --v1: #ff9e22; --v2: #4db6ac; --v3: #9575cd; --v4: #f06292; }
+        body { font-family: 'Avenir Next', sans-serif; background: linear-gradient(180deg, #00b4db 0%, #ff7e5f 100%); background-attachment: fixed; color: #fff; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
+        .sun-bg { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: 150px; height: 150px; background: #fff7e6; border-radius: 50%; box-shadow: 0 0 80px #feb47b; z-index: -1; animation: glow 4s infinite alternate; }
+        @keyframes glow { from { transform: translateX(-50%) scale(1); opacity: 0.6; } to { transform: translateX(-50%) scale(1.15); opacity: 0.9; } }
+        #join-overlay { position: fixed; inset: 0; background: linear-gradient(180deg, #00b4db 0%, #ff7e5f 100%); z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+        .join-btn { padding: 18px 40px; border-radius: 35px; border: none; background: var(--pink); color: white; font-weight: bold; cursor: pointer; box-shadow: 0 10px 25px rgba(255,64,129,0.4); }
+        .tab-bar { position: fixed; bottom: 0; width: 100%; max-width: 450px; background: rgba(255,255,255,0.15); display: flex; justify-content: space-around; padding: 15px 0; border-radius: 30px 30px 0 0; z-index: 1000; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2); }
+        .tab-btn { background: none; border: none; font-size: 0.8rem; font-weight: 800; color: #fff; opacity: 0.6; }
+        .tab-btn.active { opacity: 1; border-bottom: 3px solid #fff; }
+        .page { display: none; width: 100%; max-width: 400px; padding: 25px 25px 150px; box-sizing: border-box; }
+        .page.active { display: block; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .day-box { aspect-ratio: 1/1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(5px); }
+        .day-box.complete { border-color: transparent; }
+        .leader-row { background: rgba(255,255,255,0.15); padding: 15px; border-radius: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1); }
+        #hype-toast { position: fixed; top: 20px; width: 85%; max-width: 350px; background: #fff; color: #333; padding: 15px; border-radius: 20px; z-index: 4000; display: none; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: slideIn 0.5s; }
+        @keyframes slideIn { from { transform: translateY(-100px); } to { transform: translateY(0); } }
+        .hype-wall { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 20px; margin-top: 20px; max-height: 200px; overflow-y: auto; }
+        .hype-msg { font-size: 0.8rem; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 30px; z-index: 2100; width: 85%; max-width: 320px; text-align: center; color: #333; }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2050; backdrop-filter: blur(5px); }
     </style>
 </head>
 <body>
-
-    <div id="notification-toast"></div>
+    <div class="sun-bg"></div>
+    <div id="hype-toast"></div>
 
     <div id="join-overlay">
-        <h1 style="font-size: 3.5rem; margin-bottom: 0;">🏝️</h1>
-        <h1 style="font-size: 2.2rem; margin-top: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.2);">Core-a-Cabana</h1>
-        <p style="font-size: 1.2rem; opacity: 0.9;">Paradise is just 32 days away.</p>
-        <input type="text" id="user-name" placeholder="Enter Your Name" style="padding:18px; border-radius:20px; border:none; width:80%; font-size: 1.1rem; margin: 25px 0; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
-        <button onclick="joinChallenge()" style="padding:18px 50px; border-radius:35px; border:none; background:var(--pink); color:white; font-weight:bold; font-size: 1.2rem; cursor: pointer; box-shadow: 0 10px 25px rgba(255,64,129,0.4);">ENTER THE CABANA 🌴</button>
+        <h1 style="font-size: 3rem;">🍹</h1>
+        <h1>Core-a-Cabana</h1>
+        <input type="text" id="user-name" placeholder="Enter Your Name" style="padding:15px; border-radius:15px; border:none; width:80%; text-align: center; margin-bottom: 20px;">
+        <button class="join-btn" onclick="joinChallenge()">START THE CHALLENGE 🌴</button>
     </div>
 
     <div id="dashboard" class="page active">
-        <div style="text-align: center; margin-bottom: 25px;">
-            <h1 style="font-size: 2.2rem; margin-bottom: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.2);">My Cabana ⛱️</h1>
-            <span style="background: rgba(255,255,255,0.3); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; letter-spacing: 1px;">JAN 3 — FEB 3</span>
-        </div>
-        
+        <h1 style="text-align: center;">My Progress 🥥</h1>
         <div class="grid" id="challenge-grid"></div>
-
-        <div class="hydration-card">
-            <h3 style="margin-top:0; font-size: 1.3rem;">💧 Daily Hydration</h3>
-            <div style="font-size: 2.5rem; font-weight: bold; margin: 10px 0;"><span id="water-count">0</span><span style="font-size: 1rem; opacity: 0.7;">/8 glasses</span></div>
-            <button onclick="updateWater(1)" style="padding:12px 30px; background:var(--aqua); color:white; border:none; border-radius:15px; font-weight:bold; cursor: pointer;">+ ADD WATER</button>
-        </div>
     </div>
 
     <div id="friends" class="page">
-        <h2 style="text-shadow: 0 4px 10px rgba(0,0,0,0.2);">🔥 Squad Leaderboard</h2>
+        <h1>🏆 Squad Hype</h1>
         <div id="friends-list"></div>
-    </div>
-
-    <div id="videos" class="page">
-        <h2 style="text-shadow: 0 4px 10px rgba(0,0,0,0.2);">📺 Cabana Cinema</h2>
-        <div class="video-card" style="border-color: var(--v1)"><h4>7m Dumbbell Abs</h4><a href="https://youtu.be/89H_mthMBls" target="_blank" style="color:var(--pink); font-weight:bold; text-decoration: none;">START WORKOUT →</a></div>
-        <div class="video-card" style="border-color: var(--v2)"><h4>10m Lower Abs</h4><a href="https://www.youtube.com/watch?v=xsvLYAplbXw" target="_blank" style="color:var(--pink); font-weight:bold; text-decoration: none;">START WORKOUT →</a></div>
-        <div class="video-card" style="border-color: var(--v3)"><h4>10m Advanced Abs</h4><a href="https://www.youtube.com/watch?v=kMyMc7t-yDQ" target="_blank" style="color:var(--pink); font-weight:bold; text-decoration: none;">START WORKOUT →</a></div>
-        <div class="video-card" style="border-color: var(--v4)"><h4>8m Standing Abs</h4><a href="https://www.youtube.com/watch?v=c6UIN0uDOgU" target="_blank" style="color:var(--pink); font-weight:bold; text-decoration: none;">START WORKOUT →</a></div>
-    </div>
-
-    <div class="tab-bar">
-        <button class="tab-btn active" onclick="showPage('dashboard', this)">HOME 🏝️</button>
-        <button class="tab-btn" onclick="showPage('friends', this)">SQUAD 🔥</button>
-        <button class="tab-btn" onclick="showPage('videos', this)">VIDEOS 📺</button>
+        <div class="hype-wall" id="hype-wall">
+            <p style="font-size: 0.7rem; opacity: 0.7; margin-bottom: 5px;">SQUAD CHAT</p>
+            <div id="chat-messages"></div>
+        </div>
+        <div style="display:flex; margin-top:10px;">
+            <input type="text" id="chat-input" placeholder="Send some hype..." style="flex:1; padding:10px; border-radius:10px; border:none;">
+            <button onclick="sendHype()" style="background:var(--aqua); border:none; padding:10px; border-radius:10px; margin-left:5px;">🔥</button>
+        </div>
     </div>
 
     <div id="overlay" onclick="closeModal()"></div>
     <div id="modal">
-        <h2 style="margin-top:0">Log Workout 🥥</h2>
-        <p>Which vibe did you crush today?</p>
-        <select id="video-select" style="width:100%; padding:15px; margin-bottom:20px; border-radius:15px; border: 2px solid #eee; font-size: 1rem;">
+        <h2 style="margin-top:0">Workout Log 🍍</h2>
+        <select id="video-select" style="width:100%; padding:15px; margin-bottom:20px; border-radius:15px;">
             <option value="v1">7m Dumbbell Abs</option>
             <option value="v2">10m Lower Abs</option>
             <option value="v3">10m Advanced Abs</option>
             <option value="v4">8m Standing Abs</option>
         </select>
-        <button class="btn" style="background: linear-gradient(to right, var(--coral), var(--pink)); color: white;" onclick="markComplete()">LOG IT & SHINE ✨</button>
+        <button class="join-btn" style="width:100%;" onclick="markComplete()">LOG WORKOUT 🌴</button>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="showPage('dashboard', this)">HOME 🏝️</button>
+        <button class="tab-btn" onclick="showPage('friends', this)">SQUAD 🏆</button>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCNXn3jKb1xRpHVqZcBy9fEPFjxy_drl_Y",
-            authDomain: "core-a-cabana.firebaseapp.com",
-            projectId: "core-a-cabana",
-            storageBucket: "core-a-cabana.firebasestorage.app",
-            messagingSenderId: "914813550096",
-            appId: "1:914813550096:web:1fdc8e9486b46f0ad09495",
-            measurementId: "G-DBNTD50G8H"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyCNXn3jKb1xRpHVqZcBy9fEPFjxy_drl_Y", authDomain: "core-a-cabana.firebaseapp.com", projectId: "core-a-cabana", storageBucket: "core-a-cabana.firebasestorage.app", messagingSenderId: "914813550096", appId: "1:914813550096:web:1fdc8e9486b46f0ad09495" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         let myName = localStorage.getItem('cabanaName');
         let myWorkouts = JSON.parse(localStorage.getItem('cabanaWorkouts')) || {};
-        let waterCount = parseInt(localStorage.getItem('cabanaWater')) || 0;
-        let selectedDay = null;
+        let selectedDayKey = null;
 
         if(myName) document.getElementById('join-overlay').style.display = 'none';
 
@@ -160,70 +96,61 @@
             db.collection("players").doc(myName).set({ name: myName, count: 0, lastUpdate: Date.now() });
         }
 
-        function showPage(id, btn) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            btn.classList.add('active');
-        }
-
         function init() {
-            const grid = document.getElementById('challenge-grid');
-            grid.innerHTML = '';
+            const grid = document.getElementById('challenge-grid'); grid.innerHTML = '';
             for (let i = 0; i < 32; i++) {
-                const date = new Date(2026, 0, 3 + i);
-                const key = date.toDateString();
-                const type = myWorkouts[key];
-                const box = document.createElement('div');
-                box.className = `day-box ${type ? 'complete ' + type : ''}`;
-                box.innerHTML = `
-                    <div class="day-num">${date.getDate()}</div>
-                    <div style="font-size:0.6rem; opacity:0.8;">JAN</div>
-                    <div class="check">🌴</div>
-                `;
-                box.onclick = () => { selectedDay = key; document.getElementById('modal').style.display='block'; document.getElementById('overlay').style.display='block'; };
+                const date = new Date(2026, 0, 3 + i); const key = date.toDateString(); const type = myWorkouts[key];
+                const box = document.createElement('div'); box.className = `day-box ${type ? 'complete' : ''}`;
+                if(type) box.style.background = 'var(--pink)';
+                box.innerHTML = `<div style="font-weight:bold;">${date.getDate()}</div>${type ? '🌴' : ''}`;
+                box.onclick = () => { selectedDayKey = key; openModal(); };
                 grid.appendChild(box);
             }
-            document.getElementById('water-count').innerText = waterCount;
         }
 
         function markComplete() {
-            const type = document.getElementById('video-select').value;
-            myWorkouts[selectedDay] = type;
+            myWorkouts[selectedDayKey] = true;
             localStorage.setItem('cabanaWorkouts', JSON.stringify(myWorkouts));
             const total = Object.keys(myWorkouts).length;
-            db.collection("players").doc(myName).set({ 
-                name: myName, count: total, lastUpdate: Date.now(), msg: `${myName} just crushed a workout! 🥥🔥` 
-            }, {merge: true});
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#00e5ff', '#ff7e5f', '#ff4081'] });
-            closeModal(); init();
+            db.collection("players").doc(myName).set({ name: myName, count: total, lastUpdate: Date.now(), alert: true }, {merge:true});
+            db.collection("chat").add({ text: `🎉 Congratulate ${myName} for completing workout #${total}!`, time: Date.now() });
+            confetti({ particleCount: 150, spread: 70 }); closeModal(); init();
         }
 
-        function updateWater(val) {
-            waterCount = Math.max(0, waterCount + val);
-            localStorage.setItem('cabanaWater', waterCount);
-            if(waterCount === 8) confetti({ particleCount: 100, colors: ['#00e5ff', '#ffffff'] });
-            document.getElementById('water-count').innerText = waterCount;
+        function sendHype() {
+            const txt = document.getElementById('chat-input').value;
+            if(!txt) return;
+            db.collection("chat").add({ text: `🔥 ${myName}: ${txt}`, time: Date.now() });
+            document.getElementById('chat-input').value = '';
         }
 
-        db.collection("players").orderBy("count", "desc").onSnapshot(snap => {
-            const list = document.getElementById('friends-list');
-            list.innerHTML = '';
+        db.collection("players").onSnapshot(snap => {
+            const list = document.getElementById('friends-list'); list.innerHTML = '';
             snap.forEach(doc => {
                 const p = doc.data();
-                list.innerHTML += `<div class="friend-row"><span>🌴 <b>${p.name}</b></span><b>${p.count} / 32</b></div>`;
-                if(p.name !== myName && Date.now() - p.lastUpdate < 3000) showToast(p.msg);
+                if(p.name !== myName && p.alert && (Date.now() - p.lastUpdate < 5000)) {
+                    showHypeToast(`🎉 Hype up ${p.name}! Just finished a workout!`);
+                    db.collection("players").doc(p.name).update({alert: false});
+                }
+                list.innerHTML += `<div class="leader-row"><span>🏝️ ${p.name}</span><b>${p.count}/32</b></div>`;
             });
         });
 
-        function showToast(text) {
-            const t = document.getElementById('notification-toast');
-            t.innerText = text; t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 4000);
+        db.collection("chat").orderBy("time", "desc").limit(10).onSnapshot(snap => {
+            const chat = document.getElementById('chat-messages'); chat.innerHTML = '';
+            snap.forEach(doc => { chat.innerHTML += `<div class="hype-msg">${doc.data().text}</div>`; });
+        });
+
+        function showHypeToast(msg) {
+            const t = document.getElementById('hype-toast');
+            t.innerHTML = `<b>SQUAD ALERT</b><br>${msg}<br><button onclick="sendHypeEmoji('🔥')" style="margin-top:10px; border:none; background:none; font-size:1.5rem;">🔥</button><button onclick="sendHypeEmoji('🥥')" style="border:none; background:none; font-size:1.5rem;">🥥</button>`;
+            t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 8000);
         }
 
+        function sendHypeEmoji(e) { db.collection("chat").add({ text: `${myName} sent a ${e} to the squad!`, time: Date.now() }); }
+        function openModal() { document.getElementById('modal').style.display='block'; document.getElementById('overlay').style.display='block'; }
         function closeModal() { document.getElementById('modal').style.display='none'; document.getElementById('overlay').style.display='none'; }
-        
+        function showPage(id, btn) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); }
         init();
     </script>
 </body>
