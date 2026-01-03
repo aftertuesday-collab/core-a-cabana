@@ -39,4 +39,170 @@
 
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .grid { display: grid; grid-template-columns:
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 12px; }
+        .day-box {
+            aspect-ratio: 1/1; background: rgba(255, 255, 255, 0.5); border: 2px solid white;
+            border-radius: 15px; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; cursor: pointer; transition: 0.2s;
+        }
+        .day-box.complete { color: white; border-color: transparent; }
+        .day-box.v1 { background-color: var(--v1); } .day-box.v2 { background-color: var(--v2); }
+        .day-box.v3 { background-color: var(--v3); } .day-box.v4 { background-color: var(--v4); }
+        .day-box .check { display: none; } .day-box.complete .check { display: block; }
+
+        .friend-row { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        #join-overlay { position: fixed; inset: 0; background: var(--ocean); z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 30px; text-align: center; }
+        
+        .video-card { background: white; padding: 20px; border-radius: 20px; margin-bottom: 15px; border-left: 8px solid var(--ocean); }
+        .btn { padding: 15px; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; width: 100%; }
+        
+        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 25px; z-index: 1100; width: 85%; max-width: 320px; text-align: center; }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1050; backdrop-filter: blur(4px); }
+    </style>
+</head>
+<body>
+
+    <div id="notification-toast"></div>
+
+    <div id="join-overlay">
+        <h1 style="font-size: 2.5rem; margin-bottom: 10px;">🏝️ Core-a-Cabana</h1>
+        <p>Welcome to the 32-day squad challenge!</p>
+        <input type="text" id="user-name" placeholder="Enter Your Name" style="padding:15px; border-radius:15px; border:none; width:80%; font-size: 1.1rem; margin: 20px 0;">
+        <button onclick="joinChallenge()" style="padding:15px 40px; border-radius:30px; border:none; background:var(--sunset); color:white; font-weight:bold; font-size: 1.1rem;">JOIN THE SQUAD</button>
+    </div>
+
+    <div id="dashboard" class="page active">
+        <h1 style="text-align: center; color: var(--ocean); margin-bottom: 5px;">My Cabana</h1>
+        <p style="text-align: center; margin-top: 0; font-size: 0.9rem; opacity: 0.7; font-weight: bold;">JAN 3 — FEB 3</p>
+        <div class="grid" id="challenge-grid"></div>
+        <div style="background: white; padding: 20px; border-radius: 25px; margin-top: 30px; text-align: center;">
+            <h3 style="margin-top:0">💧 Hydration: <span id="water-count" style="color:var(--ocean)">0</span>/8</h3>
+            <button onclick="updateWater(1)" style="padding:10px 25px; background:var(--ocean); color:white; border:none; border-radius:12px; font-weight:bold;">+ ADD GLASS</button>
+        </div>
+    </div>
+
+    <div id="friends" class="page">
+        <h2 style="color:var(--ocean)">🔥 Squad Leaderboard</h2>
+        <div id="friends-list"></div>
+    </div>
+
+    <div id="videos" class="page">
+        <h2 style="color:var(--ocean)">📺 Video Library</h2>
+        <div class="video-card" style="border-color: var(--v1)"><h4>7m Dumbbell Abs</h4><a href="https://youtu.be/89H_mthMBls" target="_blank" style="color:var(--sunset); font-weight:bold;">Watch →</a></div>
+        <div class="video-card" style="border-color: var(--v2)"><h4>10m Lower Abs</h4><a href="https://www.youtube.com/watch?v=xsvLYAplbXw" target="_blank" style="color:var(--sunset); font-weight:bold;">Watch →</a></div>
+        <div class="video-card" style="border-color: var(--v3)"><h4>10m Advanced Abs</h4><a href="https://www.youtube.com/watch?v=kMyMc7t-yDQ" target="_blank" style="color:var(--sunset); font-weight:bold;">Watch →</a></div>
+        <div class="video-card" style="border-color: var(--v4)"><h4>8m Standing Abs</h4><a href="https://www.youtube.com/watch?v=c6UIN0uDOgU" target="_blank" style="color:var(--sunset); font-weight:bold;">Watch →</a></div>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="showPage('dashboard', this)">Home</button>
+        <button class="tab-btn" onclick="showPage('friends', this)">Squad</button>
+        <button class="tab-btn" onclick="showPage('videos', this)">Videos</button>
+    </div>
+
+    <div id="overlay" onclick="closeModal()"></div>
+    <div id="modal">
+        <h3>Log Workout</h3>
+        <select id="video-select" style="width:100%; padding:12px; margin-bottom:20px; border-radius:10px;">
+            <option value="v1">7m Dumbbell Abs</option>
+            <option value="v2">10m Lower Abs</option>
+            <option value="v3">10m Advanced Abs</option>
+            <option value="v4">8m Standing Abs</option>
+        </select>
+        <button class="btn" style="background: var(--sunset); color: white;" onclick="markComplete()">FINISH WORKOUT 🌴</button>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNXn3jKb1xRpHVqZcBy9fEPFjxy_drl_Y",
+            authDomain: "core-a-cabana.firebaseapp.com",
+            projectId: "core-a-cabana",
+            storageBucket: "core-a-cabana.firebasestorage.app",
+            messagingSenderId: "914813550096",
+            appId: "1:914813550096:web:1fdc8e9486b46f0ad09495",
+            measurementId: "G-DBNTD50G8H"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        let myName = localStorage.getItem('cabanaName');
+        let myWorkouts = JSON.parse(localStorage.getItem('cabanaWorkouts')) || {};
+        let waterCount = parseInt(localStorage.getItem('cabanaWater')) || 0;
+        let selectedDay = null;
+
+        if(myName) document.getElementById('join-overlay').style.display = 'none';
+
+        function joinChallenge() {
+            const name = document.getElementById('user-name').value.trim();
+            if(!name) return;
+            myName = name;
+            localStorage.setItem('cabanaName', name);
+            document.getElementById('join-overlay').style.display = 'none';
+            db.collection("players").doc(myName).set({ name: myName, count: 0, lastUpdate: Date.now() });
+        }
+
+        function showPage(id, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function init() {
+            const grid = document.getElementById('challenge-grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 32; i++) {
+                const date = new Date(2026, 0, 3 + i);
+                const key = date.toDateString();
+                const type = myWorkouts[key];
+                const box = document.createElement('div');
+                box.className = `day-box ${type ? 'complete ' + type : ''}`;
+                box.innerHTML = `<span style="font-size:0.7rem">${date.getMonth()+1}/${date.getDate()}</span><span class="check">✔</span>`;
+                box.onclick = () => { selectedDay = key; document.getElementById('modal').style.display='block'; document.getElementById('overlay').style.display='block'; };
+                grid.appendChild(box);
+            }
+            document.getElementById('water-count').innerText = waterCount;
+        }
+
+        function markComplete() {
+            const type = document.getElementById('video-select').value;
+            myWorkouts[selectedDay] = type;
+            localStorage.setItem('cabanaWorkouts', JSON.stringify(myWorkouts));
+            const total = Object.keys(myWorkouts).length;
+            db.collection("players").doc(myName).set({ 
+                name: myName, count: total, lastUpdate: Date.now(), msg: `${myName} just crushed a workout! 🔥` 
+            }, {merge: true});
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            closeModal(); init();
+        }
+
+        function updateWater(val) {
+            waterCount = Math.max(0, waterCount + val);
+            localStorage.setItem('cabanaWater', waterCount);
+            if(waterCount === 8) confetti({ particleCount: 100, colors: ['#0077be', '#ffffff'] });
+            document.getElementById('water-count').innerText = waterCount;
+        }
+
+        db.collection("players").orderBy("count", "desc").onSnapshot(snap => {
+            const list = document.getElementById('friends-list');
+            list.innerHTML = '';
+            snap.forEach(doc => {
+                const p = doc.data();
+                list.innerHTML += `<div class="friend-row"><span>${p.name}</span><b>${p.count} / 32</b></div>`;
+                if(p.name !== myName && Date.now() - p.lastUpdate < 3000) showToast(p.msg);
+            });
+        });
+
+        function showToast(text) {
+            const t = document.getElementById('notification-toast');
+            t.innerText = text; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 4000);
+        }
+
+        function closeModal() { document.getElementById('modal').style.display='none'; document.getElementById('overlay').style.display='none'; }
+        
+        init();
+    </script>
+</body>
+</html>
