@@ -3,86 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Core-a-Cabana Challenge</title>
+    <title>Core-a-Cabana</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        :root { --aqua: #00e5ff; --coral: #ff7e5f; --sunny: #feb47b; --pink: #ff4081; --palm: #2e7d32; --v1: #ff9e22; --v2: #4db6ac; --v3: #9575cd; --v4: #f06292; }
-        body { font-family: 'Avenir Next', sans-serif; background: linear-gradient(180deg, #00b4db 0%, #ff7e5f 100%); background-attachment: fixed; color: #fff; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
-        .sun-bg { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); width: 150px; height: 150px; background: #fff7e6; border-radius: 50%; box-shadow: 0 0 80px #feb47b; z-index: -1; animation: glow 4s infinite alternate; }
-        @keyframes glow { from { transform: translateX(-50%) scale(1); opacity: 0.6; } to { transform: translateX(-50%) scale(1.15); opacity: 0.9; } }
-        #join-overlay { position: fixed; inset: 0; background: linear-gradient(180deg, #00b4db 0%, #ff7e5f 100%); z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
-        .join-btn { padding: 18px 40px; border-radius: 35px; border: none; background: var(--pink); color: white; font-weight: bold; cursor: pointer; box-shadow: 0 10px 25px rgba(255,64,129,0.4); }
-        .tab-bar { position: fixed; bottom: 0; width: 100%; max-width: 450px; background: rgba(255,255,255,0.15); display: flex; justify-content: space-around; padding: 15px 0; border-radius: 30px 30px 0 0; z-index: 1000; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2); }
-        .tab-btn { background: none; border: none; font-size: 0.8rem; font-weight: 800; color: #fff; opacity: 0.6; }
-        .tab-btn.active { opacity: 1; border-bottom: 3px solid #fff; }
-        .page { display: none; width: 100%; max-width: 400px; padding: 25px 25px 150px; box-sizing: border-box; }
+        :root { --aqua: #00d2ff; --coral: #ff7e5f; --pink: #ff4081; --v1: #ff9e22; --v2: #4db6ac; --v3: #9575cd; --v4: #f06292; }
+        
+        body { 
+            font-family: 'Avenir Next', sans-serif; 
+            background: linear-gradient(to bottom, #00d2ff, #91eaff, #ffaf7b);
+            background-attachment: fixed;
+            color: #333; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* Tropical Decor */
+        .palm-tree { position: fixed; bottom: 80px; left: -20px; font-size: 80px; z-index: -1; opacity: 0.8; }
+        .umbrella { position: fixed; bottom: 85px; right: -10px; font-size: 60px; z-index: -1; opacity: 0.8; }
+
+        #join-overlay { position: fixed; inset: 0; background: linear-gradient(135deg, var(--aqua), var(--coral)); z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 30px; text-align: center; }
+        
+        .tab-bar { position: fixed; bottom: 0; width: 100%; max-width: 450px; background: rgba(255,255,255,0.95); display: flex; justify-content: space-around; padding: 15px 0; border-radius: 25px 25px 0 0; z-index: 1000; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
+        .tab-btn { background: none; border: none; font-size: 0.75rem; font-weight: 800; color: #888; cursor: pointer; }
+        .tab-btn.active { color: var(--pink); border-bottom: 3px solid var(--pink); }
+
+        .page { display: none; width: 100%; max-width: 400px; padding: 20px 20px 140px; box-sizing: border-box; }
         .page.active { display: block; }
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .day-box { aspect-ratio: 1/1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(5px); }
-        .day-box.complete { border-color: transparent; }
-        .leader-row { background: rgba(255,255,255,0.15); padding: 15px; border-radius: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1); }
-        #hype-toast { position: fixed; top: 20px; width: 85%; max-width: 350px; background: #fff; color: #333; padding: 15px; border-radius: 20px; z-index: 4000; display: none; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: slideIn 0.5s; }
-        @keyframes slideIn { from { transform: translateY(-100px); } to { transform: translateY(0); } }
-        .hype-wall { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 20px; margin-top: 20px; max-height: 200px; overflow-y: auto; }
-        .hype-msg { font-size: 0.8rem; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 30px; z-index: 2100; width: 85%; max-width: 320px; text-align: center; color: #333; }
-        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2050; backdrop-filter: blur(5px); }
+
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .day-box { 
+            aspect-ratio: 1/1; background: white; border: 2px solid #eee; border-radius: 12px; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .day-box.complete { border-color: transparent; color: white; font-weight: bold; }
+        .day-box.v1 { background: var(--v1); } .day-box.v2 { background: var(--v2); } 
+        .day-box.v3 { background: var(--v3); } .day-box.v4 { background: var(--v4); }
+
+        .card { background: white; padding: 20px; border-radius: 20px; margin-top: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .video-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; color: #333; text-align: left; border-left: 6px solid var(--aqua); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        
+        #hype-toast { position: fixed; top: 20px; width: 85%; max-width: 350px; background: white; padding: 15px; border-radius: 15px; z-index: 4000; display: none; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-left: 5px solid var(--pink); }
+        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 25px; z-index: 2100; width: 80%; max-width: 300px; text-align: center; }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2050; backdrop-filter: blur(3px); }
+        
+        .btn { background: var(--pink); color: white; padding: 12px 25px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; width: 100%; }
+        .chat-row { text-align: left; font-size: 0.85rem; padding: 5px 0; border-bottom: 1px solid #eee; color: #555; }
     </style>
 </head>
 <body>
-    <div class="sun-bg"></div>
+    <div class="palm-tree">🌴</div>
+    <div class="umbrella">⛱️</div>
     <div id="hype-toast"></div>
 
     <div id="join-overlay">
-        <h1 style="font-size: 3rem;">🍹</h1>
-        <h1>Core-a-Cabana</h1>
-        <input type="text" id="user-name" placeholder="Enter Your Name" style="padding:15px; border-radius:15px; border:none; width:80%; text-align: center; margin-bottom: 20px;">
-        <button class="join-btn" onclick="joinChallenge()">START THE CHALLENGE 🌴</button>
+        <h1 style="font-size: 3rem; margin:0;">🍹</h1>
+        <h1 style="margin:0;">Core-a-Cabana</h1>
+        <p>Your 32-Day Tropical Challenge</p>
+        <input type="text" id="user-name" placeholder="Enter Name" style="padding:15px; border-radius:12px; border:none; width:80%; text-align: center; margin: 20px 0;">
+        <button class="btn" style="background: white; color: var(--pink);" onclick="joinChallenge()">JOIN SQUAD</button>
     </div>
 
     <div id="dashboard" class="page active">
-        <h1 style="text-align: center;">My Progress 🥥</h1>
+        <h2 style="text-align: center; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">My Progress 🥥</h2>
         <div class="grid" id="challenge-grid"></div>
+        <div class="card">
+            <h3 style="margin:0; color: var(--aqua);">💧 Hydration</h3>
+            <div style="font-size: 2rem; font-weight: bold; margin: 5px 0;"><span id="water-count">0</span>/8</div>
+            <button onclick="updateWater(1)" style="padding:8px 20px; background:var(--aqua); color:white; border:none; border-radius:10px; font-weight:bold;">+ ADD WATER</button>
+        </div>
+        <center><button style="margin-top:30px; background:none; border:none; color:white; font-size:0.7rem;" onclick="resetApp()">Reset My Data</button></center>
     </div>
 
     <div id="friends" class="page">
-        <h1>🏆 Squad Hype</h1>
-        <div id="friends-list"></div>
-        <div class="hype-wall" id="hype-wall">
-            <p style="font-size: 0.7rem; opacity: 0.7; margin-bottom: 5px;">SQUAD CHAT</p>
-            <div id="chat-messages"></div>
+        <h2 style="text-align: center; color: white;">🏆 Squad Leaderboard</h2>
+        <div id="friends-list" class="card" style="text-align: left; padding: 10px;"></div>
+        <div class="card">
+            <p style="font-size: 0.7rem; color: #888; text-align: left;">SQUAD HYPE</p>
+            <div id="chat-messages" style="max-height: 150px; overflow-y: auto; margin-bottom: 10px;"></div>
+            <div style="display:flex;">
+                <input type="text" id="chat-input" placeholder="Hype them up..." style="flex:1; padding:10px; border:1px solid #eee; border-radius:10px;">
+                <button onclick="sendHype()" style="background:var(--aqua); color:white; border:none; padding:10px; border-radius:10px; margin-left:5px;">🔥</button>
+            </div>
         </div>
-        <div style="display:flex; margin-top:10px;">
-            <input type="text" id="chat-input" placeholder="Send some hype..." style="flex:1; padding:10px; border-radius:10px; border:none;">
-            <button onclick="sendHype()" style="background:var(--aqua); border:none; padding:10px; border-radius:10px; margin-left:5px;">🔥</button>
-        </div>
+    </div>
+
+    <div id="videos" class="page">
+        <h2 style="text-align: center; color: white;">📺 Workouts</h2>
+        <div class="video-card"><b>7m Dumbbell Abs</b><br><a href="https://youtu.be/89H_mthMBls" target="_blank" style="color:var(--pink); text-decoration:none;">Watch Video →</a></div>
+        <div class="video-card"><b>10m Lower Abs</b><br><a href="https://www.youtube.com/watch?v=xsvLYAplbXw" target="_blank" style="color:var(--pink); text-decoration:none;">Watch Video →</a></div>
+        <div class="video-card"><b>10m Advanced Abs</b><br><a href="https://www.youtube.com/watch?v=kMyMc7t-yDQ" target="_blank" style="color:var(--pink); text-decoration:none;">Watch Video →</a></div>
+        <div class="video-card"><b>8m Standing Abs</b><br><a href="https://www.youtube.com/watch?v=c6UIN0uDOgU" target="_blank" style="color:var(--pink); text-decoration:none;">Watch Video →</a></div>
     </div>
 
     <div id="overlay" onclick="closeModal()"></div>
     <div id="modal">
-        <h2 style="margin-top:0">Workout Log 🍍</h2>
-        <select id="video-select" style="width:100%; padding:15px; margin-bottom:20px; border-radius:15px;">
+        <h3 style="margin-top:0">Log Workout 🍍</h3>
+        <select id="video-select" style="width:100%; padding:12px; margin-bottom:15px; border-radius:10px; border:1px solid #ddd;">
             <option value="v1">7m Dumbbell Abs</option>
             <option value="v2">10m Lower Abs</option>
             <option value="v3">10m Advanced Abs</option>
             <option value="v4">8m Standing Abs</option>
         </select>
-        <button class="join-btn" style="width:100%;" onclick="markComplete()">LOG WORKOUT 🌴</button>
+        <button class="btn" onclick="markComplete()">LOG IT 🌴</button>
     </div>
 
     <div class="tab-bar">
         <button class="tab-btn active" onclick="showPage('dashboard', this)">HOME 🏝️</button>
         <button class="tab-btn" onclick="showPage('friends', this)">SQUAD 🏆</button>
+        <button class="tab-btn" onclick="showPage('videos', this)">VIDEOS 📺</button>
     </div>
 
     <script>
+        const quotes = ["You miss 100% of the shots you don’t take.", "Hard work beats talent.", "Don't count the days, make the days count.", "Champions keep playing until they get it right.", "Gold medals are made of sweat.", "Pressure is a privilege.", "Victory is in having done your best.", "Persistence changes failure into achievement."];
         const firebaseConfig = { apiKey: "AIzaSyCNXn3jKb1xRpHVqZcBy9fEPFjxy_drl_Y", authDomain: "core-a-cabana.firebaseapp.com", projectId: "core-a-cabana", storageBucket: "core-a-cabana.firebasestorage.app", messagingSenderId: "914813550096", appId: "1:914813550096:web:1fdc8e9486b46f0ad09495" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         let myName = localStorage.getItem('cabanaName');
         let myWorkouts = JSON.parse(localStorage.getItem('cabanaWorkouts')) || {};
+        let waterCount = parseInt(localStorage.getItem('cabanaWater')) || 0;
         let selectedDayKey = null;
 
         if(myName) document.getElementById('join-overlay').style.display = 'none';
@@ -90,8 +129,7 @@
         function joinChallenge() {
             const name = document.getElementById('user-name').value.trim();
             if(!name) return;
-            myName = name;
-            localStorage.setItem('cabanaName', name);
+            myName = name; localStorage.setItem('cabanaName', name);
             document.getElementById('join-overlay').style.display = 'none';
             db.collection("players").doc(myName).set({ name: myName, count: 0, lastUpdate: Date.now() });
         }
@@ -100,57 +138,47 @@
             const grid = document.getElementById('challenge-grid'); grid.innerHTML = '';
             for (let i = 0; i < 32; i++) {
                 const date = new Date(2026, 0, 3 + i); const key = date.toDateString(); const type = myWorkouts[key];
-                const box = document.createElement('div'); box.className = `day-box ${type ? 'complete' : ''}`;
-                if(type) box.style.background = 'var(--pink)';
-                box.innerHTML = `<div style="font-weight:bold;">${date.getDate()}</div>${type ? '🌴' : ''}`;
+                const box = document.createElement('div'); box.className = `day-box ${type ? 'complete ' + type : ''}`;
+                box.innerHTML = `<span style="font-size:0.9rem;">${date.getDate()}</span><span style="font-size:0.6rem; opacity:0.6;">JAN</span>${type ? '🌴' : ''}`;
                 box.onclick = () => { selectedDayKey = key; openModal(); };
                 grid.appendChild(box);
             }
+            document.getElementById('water-count').innerText = waterCount;
         }
 
         function markComplete() {
-            myWorkouts[selectedDayKey] = true;
+            const type = document.getElementById('video-select').value;
+            myWorkouts[selectedDayKey] = type;
             localStorage.setItem('cabanaWorkouts', JSON.stringify(myWorkouts));
             const total = Object.keys(myWorkouts).length;
             db.collection("players").doc(myName).set({ name: myName, count: total, lastUpdate: Date.now(), alert: true }, {merge:true});
-            db.collection("chat").add({ text: `🎉 Congratulate ${myName} for completing workout #${total}!`, time: Date.now() });
+            db.collection("chat").add({ text: `🎉 ${myName} crushed workout #${total}!`, time: Date.now() });
+            showHypeToast(`"${quotes[total % quotes.length]}"`);
             confetti({ particleCount: 150, spread: 70 }); closeModal(); init();
         }
 
-        function sendHype() {
-            const txt = document.getElementById('chat-input').value;
-            if(!txt) return;
-            db.collection("chat").add({ text: `🔥 ${myName}: ${txt}`, time: Date.now() });
-            document.getElementById('chat-input').value = '';
-        }
+        function updateWater(val) { waterCount = Math.min(8, waterCount + val); localStorage.setItem('cabanaWater', waterCount); document.getElementById('water-count').innerText = waterCount; if(waterCount===8) confetti(); }
+        function sendHype() { const txt = document.getElementById('chat-input').value; if(!txt) return; db.collection("chat").add({ text: `🔥 ${myName}: ${txt}`, time: Date.now() }); document.getElementById('chat-input').value = ''; }
+        function showHypeToast(msg) { const t = document.getElementById('hype-toast'); t.innerHTML = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 6000); }
+        function openModal() { document.getElementById('modal').style.display='block'; document.getElementById('overlay').style.display='block'; }
+        function closeModal() { document.getElementById('modal').style.display='none'; document.getElementById('overlay').style.display='none'; }
+        function showPage(id, btn) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); }
+        function resetApp() { if(confirm("Start fresh?")) { localStorage.clear(); window.location.reload(); } }
 
-        db.collection("players").onSnapshot(snap => {
+        db.collection("players").orderBy("count", "desc").onSnapshot(snap => {
             const list = document.getElementById('friends-list'); list.innerHTML = '';
             snap.forEach(doc => {
                 const p = doc.data();
-                if(p.name !== myName && p.alert && (Date.now() - p.lastUpdate < 5000)) {
-                    showHypeToast(`🎉 Hype up ${p.name}! Just finished a workout!`);
-                    db.collection("players").doc(p.name).update({alert: false});
-                }
-                list.innerHTML += `<div class="leader-row"><span>🏝️ ${p.name}</span><b>${p.count}/32</b></div>`;
+                if(p.name !== myName && p.alert && (Date.now() - p.lastUpdate < 5000)) showHypeToast(`🎉 CONGRATS to ${p.name}!`);
+                list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #eee;"><span>🏝️ ${p.name}</span><b>${p.count}/32</b></div>`;
             });
         });
 
         db.collection("chat").orderBy("time", "desc").limit(10).onSnapshot(snap => {
             const chat = document.getElementById('chat-messages'); chat.innerHTML = '';
-            snap.forEach(doc => { chat.innerHTML += `<div class="hype-msg">${doc.data().text}</div>`; });
+            snap.forEach(doc => { chat.innerHTML += `<div class="chat-row">${doc.data().text}</div>`; });
         });
 
-        function showHypeToast(msg) {
-            const t = document.getElementById('hype-toast');
-            t.innerHTML = `<b>SQUAD ALERT</b><br>${msg}<br><button onclick="sendHypeEmoji('🔥')" style="margin-top:10px; border:none; background:none; font-size:1.5rem;">🔥</button><button onclick="sendHypeEmoji('🥥')" style="border:none; background:none; font-size:1.5rem;">🥥</button>`;
-            t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 8000);
-        }
-
-        function sendHypeEmoji(e) { db.collection("chat").add({ text: `${myName} sent a ${e} to the squad!`, time: Date.now() }); }
-        function openModal() { document.getElementById('modal').style.display='block'; document.getElementById('overlay').style.display='block'; }
-        function closeModal() { document.getElementById('modal').style.display='none'; document.getElementById('overlay').style.display='none'; }
-        function showPage(id, btn) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); btn.classList.add('active'); }
         init();
     </script>
 </body>
